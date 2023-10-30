@@ -1,44 +1,66 @@
-import React, { useState ,useEffect} from 'react';
+import React, { useReducer, useState} from 'react';
+ import Tasks from './Tasks';
 
-import Login from './components/Login/Login';
-import Home from './components/Home/Home';
-import MainHeader from './components/MainHeader/MainHeader';
+
+let DUMMY_TASKS = [
+  {name:'study' , duration : 1},
+  {name:'food' , duration : 2},
+
+]
+
+const taskReducer = (state , action) =>{
+    switch(action.type){   
+      case 'ADD_TASK':
+        let updatedTask = [...state , {name:action.name , duration : action.duration}];
+        return updatedTask;
+    }
+}
+
+
 
 function App() {
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+const [state , dispatch] = useReducer(taskReducer , DUMMY_TASKS);
+
+const [name , setName] = useState('');
+const [duration , setDuration] = useState('');
+
+const nameHandler = (event)=>{
+ setName(event.target.value);
+}
 
 
-useEffect(()=>{
-   const stroredUserLoggedInInformation = localStorage.getItem('isLoggedIn');
-
-   if(stroredUserLoggedInInformation==='1'){
-    setIsLoggedIn(true);
-   }
-},[])
+const durationHandler = (event)=>{
+  setDuration(event.target.value);
+}
 
 
-
-  const loginHandler = (email, password) => {
-
-    localStorage.setItem('isLoggedIn', '1');
-    setIsLoggedIn(true);
-  };
-
-  const logoutHandler = () => {
-    localStorage.removeItem('isLoggedIn');
-
-    setIsLoggedIn(false);
-  };
 
   return (
-    <React.Fragment>
-      <MainHeader isAuthenticated={isLoggedIn} onLogout={logoutHandler} />
-      <main>
-        {!isLoggedIn && <Login onLogin={loginHandler} />}
-        {isLoggedIn && <Home onLogout={logoutHandler} />}
-      </main>
-    </React.Fragment>
+   
+   <div>
+   <form>
+    <label>Task name</label>
+    <input type='text' onChange={nameHandler} value={name}/>
+    <label>Task duration</label>
+    <input type='number' onChange={durationHandler} value={duration}/>
+    <button type='submit' onClick={(event)=>{
+      event.preventDefault();
+      dispatch({type:'ADD_TASK' , name:name ,duration:duration });
+      setName('');
+      setDuration('');
+    }}>Add task</button>
+   </form>
+
+
+   <div>
+   {state.map((task)=>{
+   return <Tasks task={task}/>
+   })}
+   </div>
+
+   </div>
   );
 }
 
